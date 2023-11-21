@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile
+      target: prod
+    image: document_uploader:${DOCUMENT_UPLOADER_VERSION:-latest}
+    restart: always
+    env_file:
+    - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DOCUMENT_UPLOADER_HOST: 0.0.0.0
+      DOCUMENT_UPLOADER_DB_HOST: document_uploader-db
+      DOCUMENT_UPLOADER_DB_PORT: 5432
+      DOCUMENT_UPLOADER_DB_USER: document_uploader
+      DOCUMENT_UPLOADER_DB_PASS: document_uploader
+      DOCUMENT_UPLOADER_DB_BASE: document_uploader
+
+  db:
+    image: postgres:13.8-bullseye
+    hostname: document_uploader-db
+    environment:
+      POSTGRES_PASSWORD: "document_uploader"
+      POSTGRES_USER: "document_uploader"
+      POSTGRES_DB: "document_uploader"
+    volumes:
+    - document_uploader-db-data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: pg_isready -U document_uploader
+      interval: 2s
+      timeout: 3s
+      retries: 40
+
+  migrator:
+    image: document_uploader:${DOCUMENT_UPLOADER_VERSION:-latest}
+    restart: "no"
+    command: alembic upgrade head
+    environment:
+      DOCUMENT_UPLOADER_DB_HOST: document_uploader-db
+      DOCUMENT_UPLOADER_DB_PORT: 5432
+      DOCUMENT_UPLOADER_DB_USER: document_uploader
+      DOCUMENT_UPLOADER_DB_PASS: document_uploader
+      DOCUMENT_UPLOADER_DB_BASE: document_uploader
+    depends_on:
+      db:
+        condition: service_healthy
+
+
+
+volumes:
+  document_uploader-db-data:
+    name: document_uploader-db-data
