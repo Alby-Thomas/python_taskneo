@@ -1,7 +1,6 @@
 import enum
 from pathlib import Path
 from tempfile import gettempdir
-from typing import ClassVar
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from yarl import URL
@@ -28,7 +27,6 @@ class Settings(BaseSettings):
     with environment variables.
     """
 
-    ACCESS_TOKEN_EXPIRE_MINUTES: ClassVar[int] = 30
     host: str = "127.0.0.1"
     port: int = 8000
     # quantity of workers for uvicorn
@@ -43,10 +41,15 @@ class Settings(BaseSettings):
     # Variables for the database
     db_host: str = "localhost"
     db_port: int = 5432
-    db_user: str = "doc_user"
-    db_pass: str = "0987"
-    db_base: str = "document"
+    db_user: str = "document_uploader"
+    db_pass: str = "document_uploader"
+    db_base: str = "document_uploader"
     db_echo: bool = False
+
+    # tokens and keys
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    SECRET_KEY: str
+    ALGORITHM: str
 
     @property
     def db_url(self) -> URL:

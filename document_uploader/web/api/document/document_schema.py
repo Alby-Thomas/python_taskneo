@@ -2,19 +2,20 @@ from pydantic import BaseModel
 
 
 class DocumentBase(BaseModel):
-    title: str
-    content: str
+    """Base schema for a document."""
 
 
 class DocumentCreate(DocumentBase):
-    pass
+    """Schema for creating a document."""
 
 
 class DocumentResponse(BaseModel):
+    """Schema for a document response."""
+
     id: int
     title: str
     content: str
     owner_id: int
 
     class Config:
-        from_attributes = True
+        """Pydantic configuration for DocumentResponse."""
